@@ -8,6 +8,7 @@ import torch.utils.data as data
 import utils as ut
 
 # PyTorch class to load the MRNet dataset
+# PyTorch DataLoader Class needs to implement __init__(), __len()__, __getitem()__
 
 class MRDataset(data.Dataset):
     def __init__(self, root_dir, task, plane, train=True, weights=None):

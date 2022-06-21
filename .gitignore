@@ -1,3 +1,5 @@
 images/
 saved_model/
+models/
 .idea/
+data/

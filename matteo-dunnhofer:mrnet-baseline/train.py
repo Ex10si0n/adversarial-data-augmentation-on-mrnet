@@ -20,11 +20,31 @@ from sklearn import metrics
 import csv
 import utils as ut
 
+def fgsm_attack(model, image, label, epsilon, device):
+    """
+    Procedure to perform FGSM attack on a single image
+    """
+    image = image.to(device)
+    label = label.to(device)
+
+    prediction = model(image.float())
+
+    loss = F.binary_cross_entropy_with_logits(prediction, label)
+
+    loss.backward()
+
+    perturbation = image.grad.data.clone()
+    perturbation = perturbation.sign()
+    perturbation = epsilon * perturbation
+    perturbed_image = image + perturbation
+
+    return perturbed_image
 
 def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every=100):
     """
     Procedure to train a model on the training set
     """
+
     model.train()
 
     model = model.to(device)
@@ -39,15 +59,32 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         label = label.to(device)
         weight = weight.to(device)
 
+        # [FGSM] Set requires_grad attribute of tensor
+        image.requires_grad = True
+
         prediction = model(image.float())
 
         loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weight)
-        
+
+        # Train origin model
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
+        # [FGSM] Collect data gradients
+        # data_grad = image.grad.data.clone()
+
+        # [FGSM] Call FGSM attack
+        perturbed_image = fgsm_attack(model, image, label, epsilon=0.1, device=device)
+        adv_prediction = model(perturbed_image.float())
+
+        # print("Iteration", i)
+        # print("prediction: ", prediction)
+        # print("adv_prediction: ", adv_prediction)
+        # print("-"*50)
+
         loss_value = loss.item()
+        # print("origin_loss: ", loss_value)
         losses.append(loss_value)
 
         probas = torch.sigmoid(prediction)
@@ -75,8 +112,16 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
                       np.round(auc, 4),
                       current_lr
                   )
-                  )
+            )
 
+        # [FGSM] Adversarial train
+        optimizer.zero_grad()
+        adv_loss = F.binary_cross_entropy_with_logits(adv_prediction, label, weight=weight)
+        adv_loss.backward()
+        optimizer.step()
+
+        # print("adv_loss: ", adv_loss.item())
+        # print("-" * 50)
     writer.add_scalar('Train/AUC_epoch', auc, epoch)
 
     train_loss_epoch = np.round(np.mean(losses), 4)
@@ -152,7 +197,7 @@ def get_lr(optimizer):
     for param_group in optimizer.param_groups:
         return param_group['lr']
 
-def run(args):
+def run(args, adv=False):
     random.seed(args.seed)
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -190,7 +235,7 @@ def run(args):
     if torch.cuda.is_available():
         device = torch.device('cuda')
     else:
-        device = torch.device('cpu')
+        device = torch.device('mps')
 
     # create the model
     mrnet = MRNet()
@@ -226,6 +271,9 @@ def run(args):
         
         # train
         train_loss, train_auc = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every)
+
+        if adv is True:
+            pass
         
         # evaluate
         val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity = evaluate_model(mrnet, validation_loader, epoch, num_epochs, writer, current_lr, device)

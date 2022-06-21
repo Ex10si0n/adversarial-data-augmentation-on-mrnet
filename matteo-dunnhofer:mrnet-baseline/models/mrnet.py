@@ -7,6 +7,7 @@ from torchvision import models
 class MRNet(nn.Module):
     def __init__(self):
         super().__init__()
+        # Transfer Learning on AlexNet
         self.model = models.alexnet(pretrained=True)
         self.gap = nn.AdaptiveAvgPool2d(1)
         self.classifier = nn.Linear(256, 1)
