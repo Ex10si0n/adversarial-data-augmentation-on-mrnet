@@ -51,7 +51,7 @@ test_dataset = torchvision.datasets.CIFAR10(root=data_path, train=False, downloa
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=True)
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'mps')
 
 # initialization
 mrnet = MRNet().to(device)
