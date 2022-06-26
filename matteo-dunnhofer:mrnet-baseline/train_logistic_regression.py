@@ -33,7 +33,7 @@ def extract_predictions(task, plane, path_to_models, train=True):
     if torch.cuda.is_available():
         device = torch.device('cuda')
     else:
-        device = torch.device('cpu')
+        device = torch.device('mps')
 
     mrnet = torch.load(model_path)
     mrnet = mrnet.to(device)
