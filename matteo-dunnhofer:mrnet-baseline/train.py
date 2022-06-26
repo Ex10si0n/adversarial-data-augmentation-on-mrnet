@@ -70,8 +70,8 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         # data_grad = image.grad.data.clone()
 
         # [FGSM] Call FGSM attack
-        perturbed_image = fgsm_attack(model, image, label, epsilon=0.001, device=device)
-        adv_prediction = model(perturbed_image.float())
+        # perturbed_image = fgsm_attack(model, image, label, epsilon=0.001, device=device)
+        # adv_prediction = model(perturbed_image.float())
 
         # Train origin model
         # optimizer.zero_grad()
@@ -80,8 +80,8 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
         # [FGSM] Adversarial train
         optimizer.zero_grad()
-        adv_loss = F.binary_cross_entropy_with_logits(adv_prediction, label, weight=weight)
-        adv_loss.backward()
+        loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weight)
+        loss.backward()
         optimizer.step()
 
         # print("Iteration", i)
