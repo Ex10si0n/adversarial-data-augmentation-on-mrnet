@@ -80,8 +80,8 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
         # [FGSM] Adversarial train
         optimizer.zero_grad()
-        loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weight)
-        loss.backward()
+        adv_loss = F.binary_cross_entropy_with_logits(adv_prediction, label, weight=weight)
+        adv_loss.backward()
         optimizer.step()
 
         # print("Iteration", i)
