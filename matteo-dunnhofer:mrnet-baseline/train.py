@@ -70,13 +70,8 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         # data_grad = image.grad.data.clone()
 
         # [FGSM] Call FGSM attack
-<<<<<<< HEAD
         perturbed_image = fgsm_attack(model, image, label, epsilon=0.01, device=device)
         adv_prediction = model(perturbed_image.float())
-=======
-        # perturbed_image = fgsm_attack(model, image, label, epsilon=0.001, device=device)
-        # adv_prediction = model(perturbed_image.float())
->>>>>>> 68bc9e470ca928d0acbfacac9848a1471922b77d
 
         # Train origin model
         # optimizer.zero_grad()
