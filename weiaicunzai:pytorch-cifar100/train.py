@@ -10,6 +10,8 @@ import os
 import sys
 import argparse
 import time
+
+f = open("experiment_e_0.00001_xception.txt", "a")
 from datetime import datetime
 
 import numpy as np
@@ -67,9 +69,12 @@ def train(epoch):
         adv_loss = loss_function(net(pertubated_image), labels)
 
         # loss.backward()
-        # Test set: Epoch: 200, Average loss: 0.0130, Accuracy: 0.7203, Time consumed:1.33s
-        # Test set: Epoch: 200, Average loss: 0.0137, Accuracy: 0.7215, Time consumed:1.36s
+        # vgg16 Test set: Epoch: 200, Average loss: 0.0130, Accuracy: 0.7203, Time consumed:1.33s
+        # vgg16 Test set: Epoch: 200, Average loss: 0.0137, Accuracy: 0.7215, Time consumed:1.36s
+        # vgg16 Test set: Epoch: 200, Average loss: 0.0140, Accuracy: 0.7162, Time consumed:1.30s
+
         adv_loss.backward()
+        loss.backward()
         optimizer.step()
 
         n_iter = (epoch - 1) * len(cifar100_training_loader) + batch_index + 1
@@ -81,7 +86,7 @@ def train(epoch):
             if 'bias' in name:
                 writer.add_scalar('LastLayerGradients/grad_norm2_bias', para.grad.norm(), n_iter)
 
-        print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\tLoss: {:0.4f}\tLR: {:0.6f}'.format(
+        f.write('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\tLoss: {:0.4f}\tLR: {:0.6f}'.format(
             loss.item(),
             optimizer.param_groups[0]['lr'],
             epoch=epoch,
