@@ -11,7 +11,6 @@ import sys
 import argparse
 import time
 
-f = open("experiment_e_0.00001_xception.txt", "a")
 from datetime import datetime
 
 import numpy as np
@@ -65,7 +64,7 @@ def train(epoch):
         outputs = net(images)
         loss = loss_function(outputs, labels)
 
-        pertubated_image = fgsm_attack(net, images, labels, epsilon=0.0001, device='cuda')
+        pertubated_image = fgsm_attack(net, images, labels, epsilon=0.000001, device='cuda')
         adv_loss = loss_function(net(pertubated_image), labels)
 
         # loss.backward()
@@ -86,7 +85,7 @@ def train(epoch):
             if 'bias' in name:
                 writer.add_scalar('LastLayerGradients/grad_norm2_bias', para.grad.norm(), n_iter)
 
-        f.write('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\tLoss: {:0.4f}\tLR: {:0.6f}'.format(
+        print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\tLoss: {:0.4f}\tLR: {:0.6f}'.format(
             loss.item(),
             optimizer.param_groups[0]['lr'],
             epoch=epoch,
