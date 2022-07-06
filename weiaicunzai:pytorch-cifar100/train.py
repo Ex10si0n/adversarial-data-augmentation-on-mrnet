@@ -74,7 +74,7 @@ def train(epoch):
         # vgg16 Test set: Epoch: 200, Average loss: 0.0140, Accuracy: 0.7162, Time consumed:1.30s
 
         adv_loss.backward()
-        loss.backward()
+        # loss.backward()
         optimizer.step()
 
         n_iter = (epoch - 1) * len(cifar100_training_loader) + batch_index + 1
