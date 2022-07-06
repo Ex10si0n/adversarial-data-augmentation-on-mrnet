@@ -68,9 +68,11 @@ def train(epoch):
         adv_loss = loss_function(net(pertubated_image), labels)
 
         # loss.backward()
-        # vgg16 Test set: Epoch: 200, Average loss: 0.0130, Accuracy: 0.7203, Time consumed:1.33s
-        # vgg16 Test set: Epoch: 200, Average loss: 0.0137, Accuracy: 0.7215, Time consumed:1.36s
-        # vgg16 Test set: Epoch: 200, Average loss: 0.0140, Accuracy: 0.7162, Time consumed:1.30s
+        # vgg16 Test set: Epoch: 200, Average loss: 0.0130, Accuracy: 0.7203, Time consumed:1.33s e=0.00
+        # vgg16 Test set: Epoch: 200, Average loss: 0.0137, Accuracy: 0.7215, Time consumed:1.36s e=1e-5
+        # vgg16 Test set: Epoch: 200, Average loss: 0.0140, Accuracy: 0.7162, Time consumed:1.30s e=1e-4
+        # vgg16 Test set: Epoch: 200, Average loss: 0.0138, Accuracy: 0.7198, Time consumed:1.33s e=1e-6
+
 
         adv_loss.backward()
         # loss.backward()
