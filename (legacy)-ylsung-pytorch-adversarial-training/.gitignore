@@ -1,0 +1,13 @@
+__pycache__/
+log/
+
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+sftp-config.json
+read_log.py
