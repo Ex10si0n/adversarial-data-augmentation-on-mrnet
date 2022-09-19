@@ -83,7 +83,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         adv_loss = F.binary_cross_entropy_with_logits(adv_prediction, label, weight=weight)
         adv_loss.backward()
         optimizer.step()
-tea
+
         # print("Iteration", i)
         # print("prediction: ", prediction)
         # print("adv_prediction: ", adv_prediction)
