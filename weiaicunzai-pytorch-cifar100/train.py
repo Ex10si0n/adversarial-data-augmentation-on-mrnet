@@ -4,11 +4,11 @@ modified Ex10si0n
 """
 
 """ SETTINGS """
-adversarial = True
+adversarial = False
 epsilon = 1e-5
 net = 'vgg16'
 percent = 1
-EPOCH = 50
+EPOCH = 200
 
 import os
 import sys
@@ -33,9 +33,9 @@ from utils import get_network, get_training_dataloader, get_test_dataloader, War
     most_recent_folder, most_recent_weights, last_epoch, best_acc_weights
 
 checkpoint = None
-if net == 'vgg16':
+if net == 'vgg16' and adversarial:
     checkpoint = torch.load('checkpoint/vgg16/Wednesday_31_August_2022_10h_14m_02s/vgg16-172-best.pth')
-if net == 'xception':
+if net == 'xception' and adversarial:
     checkpoint = torch.load('checkpoint/xception/Tuesday_30_August_2022_14h_51m_16s/xception-200-best.pth')
 
 def fgsm_attack(model, images, labels, epsilon, device='cuda'):
@@ -291,7 +291,7 @@ if __name__ == '__main__':
         net.load_state_dict(torch.load(weights_path))
         resume_epoch = last_epoch(os.path.join(settings.CHECKPOINT_PATH, args.net, recent_folder))
 
-    if args.adv:
+    if adversarial:
         net.load_state_dict(checkpoint)
 
     for epoch in range(1, settings.EPOCH + 1):
@@ -306,7 +306,7 @@ if __name__ == '__main__':
             if epoch <= resume_epoch:
                 continue
 
-        if args.adv:
+        if adversarial:
             adversarial_train(epoch)
         else:
             train(epoch)
