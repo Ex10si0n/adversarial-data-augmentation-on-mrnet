@@ -17,4 +17,4 @@ class MRNet(nn.Module):
         x = self.gap(x).view(x.size(0), -1)
         x = torch.max(x, 0, keepdim=True)[0]
         x = self.classifier(x)
-        return
+        return x

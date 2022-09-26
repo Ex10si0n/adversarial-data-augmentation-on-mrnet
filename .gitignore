@@ -2,3 +2,4 @@ images/
 saved_model/
 .idea/
 data/
+.DS_Store

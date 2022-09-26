@@ -1,6 +1,6 @@
 DATE=$(date +"%Y-%m-%d-%H-%M")
 EXPERIMENT="MRNet-${DATE}-MRNet"
-DATA_PATH='/Users/ex10si0n/Github/MRNet-v1.0/'
+DATA_PATH='/Users/ex10si0n/MRNet-v1.0/'
 EPOCHS=50
 PREFIX=MRNet
 
