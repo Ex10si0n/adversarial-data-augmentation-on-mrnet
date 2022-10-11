@@ -1,0 +1,1 @@
+run `mrnet-bot.sh`
