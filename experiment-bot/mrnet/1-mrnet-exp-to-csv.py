@@ -6,7 +6,7 @@ import settings
 
 def gen_csv(path, filename):
     folders = os.listdir(path)
-    folders = [f for f in folders if re.search(r'2022|baseline', f)]
+    folders = [f for f in folders if re.search(r'2022|baseline_v2', f)]
 
     classifier_header = ['task', 'dimension', 'eps', 'percent']
     result_header = ['LOSS', 'AUC-best', 'Accuracy-best', 'Sensitivity-best', 'Specifity-best']
@@ -48,9 +48,9 @@ if __name__ == '__main__':
     os.system('rm -f results-temp.csv')
     os.system('cp baseline.csv results-mr.csv')
 
-    old_path = '/Users/ex10si0n/Projects/research/mrnet/experiments/old/'
+    # old_path = '/Users/ex10si0n/Projects/research/mrnet/experiments/old/'
     new_path = '/Users/ex10si0n/Projects/research/mrnet/experiments/'
 
+    # gen_csv(old_path, settings.csv_file)
     gen_csv(new_path, settings.csv_file)
-    gen_csv(old_path, settings.csv_file)
 

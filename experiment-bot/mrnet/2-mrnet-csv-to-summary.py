@@ -63,6 +63,7 @@ def write_excel(worksheet, x, y, table):
 if __name__ == '__main__':
     result_lines = []
     header = None
+    gen_summary = True
 
     with open(settings.working_folder + settings.csv_file, 'r') as f:
         reader = csv.reader(f)
@@ -95,6 +96,25 @@ if __name__ == '__main__':
     table_width, table_height = 4, 4
 
     for measure in summary.fact_names():
+        if gen_summary:
+            worksheet = workbook.add_worksheet(measure + '-summary')
+            x, y = 0, 0
+            for params in summary.all_params():
+                y = all_eps.index(params[0]) + 1
+                x = all_percent.index(params[1]) + 1
+                avg = 0
+                for task in summary.all_tasks():
+                    for dimension in summary.all_dimensions():
+                        for mart in summary.query(task, dimension, params[0], params[1]):
+                            avg += float(mart.get_facts_by_name(measure))
+                avg /= 9
+                worksheet.write(x, y, avg)
+
+            for eps in all_eps:
+                for percent in all_percent:
+                    worksheet.write(all_percent.index(percent) + 1, 0, percent)
+                    worksheet.write(0, all_eps.index(eps) + 1, eps)
+
         worksheet = workbook.add_worksheet(measure)
         x, y = 0, 0
 
@@ -105,7 +125,7 @@ if __name__ == '__main__':
             template = [[(params[0], params[1]), 'axial', 'coronal', 'sagittal'],\
                         ['abnormal', None, None, None],\
                         ['acl', None, None, None],\
-                        ['meniscus',      None, None, None]]
+                        ['meniscus', None, None, None]]
 
             table = np.ndarray(shape=(3, 3))
             for task in summary.all_tasks():
@@ -120,6 +140,7 @@ if __name__ == '__main__':
             table = np.array(template, dtype=object)
             tables.append(table)
             write_excel(worksheet, x, y, table)
+
     print('Write table to excel', settings.xlsx_file)
 
     workbook.close()
