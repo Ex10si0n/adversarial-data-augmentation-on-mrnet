@@ -6,7 +6,7 @@ import settings
 
 def gen_csv(path, filename):
     folders = os.listdir(path)
-    folders = [f for f in folders if re.search(r'2022|baseline_v2', f)]
+    folders = [f for f in folders if re.search(r'2023|baseline', f)]
 
     classifier_header = ['task', 'dimension', 'eps', 'percent']
     result_header = ['LOSS', 'AUC-best', 'Accuracy-best', 'Sensitivity-best', 'Specifity-best']
