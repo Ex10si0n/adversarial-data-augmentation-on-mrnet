@@ -1,0 +1,2 @@
+LOSS,AUC-best,Accuracy-best,Sensitivity-best,Specifity-best
+0.1283,0.9053,0.825,0.8316,0.8
