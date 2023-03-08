@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+from sklearn.metrics import roc_curve
 from tensorboardX import SummaryWriter
 
 from dataloader import MRDataset
@@ -86,7 +87,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
     return train_loss_epoch, train_auc_epoch
 
 
-def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, device, log_every=20):
+def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, device, log_every=20, return_predictions=False):
     """
     Procedure to evaluate a model on the validation set
     """
@@ -148,8 +149,10 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
     val_accuracy = np.round(val_accuracy, 4)
     val_sensitivity = np.round(val_sensitivity, 4)
     val_specificity = np.round(val_specificity, 4)
-
-    return val_loss_epoch, val_auc_epoch, val_accuracy, val_sensitivity, val_specificity
+    if return_predictions:
+        return val_loss_epoch, val_auc_epoch, val_accuracy, val_sensitivity, val_specificity, y_preds, y_trues
+    else:
+        return val_loss_epoch, val_auc_epoch, val_accuracy, val_sensitivity, val_specificity
 
 
 def get_lr(optimizer):
@@ -327,6 +330,8 @@ def run(args):
     log_every = args.log_every
 
     t_start_training = time.time()
+    all_preds = []
+    all_labels = []
 
     # train and test loop
     for epoch in range(num_epochs):
@@ -338,17 +343,14 @@ def run(args):
         if args.advtrain == 1:
             train_loss, train_auc = train_model_adv(model, args.epsilon, train_loader, epoch, num_epochs, optimizer,
                                                     writer, current_lr, device, log_every, args.advtrain_percent)
-            val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity = evaluate_model(model, validation_loader,
-                                                                                               epoch, num_epochs,
-                                                                                               writer, current_lr,
-                                                                                               device)
+            val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity, val_preds, val_labels = evaluate_model(model, validation_loader, epoch, num_epochs, writer, current_lr, device, return_predictions=True)
         else:
             train_loss, train_auc = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr,
                                                 device, log_every)
-            val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity = evaluate_model(mrnet, validation_loader,
-                                                                                               epoch, num_epochs,
-                                                                                               writer, current_lr,
-                                                                                               device)
+            val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity, val_preds, val_labels = evaluate_model(mrnet, validation_loader, epoch, num_epochs, writer, current_lr, device, return_predictions=True)
+
+        all_preds.extend(val_preds)
+        all_labels.extend(val_labels)
 
         if args.lr_scheduler == 'plateau':
             scheduler.step(val_loss)
@@ -374,7 +376,7 @@ def run(args):
                 for f in os.listdir(exp_dir + '/models/'):
                     if (args.task in f) and (args.plane in f) and (args.prefix_name in f):
                         os.remove(exp_dir + f'/models/{f}')
-                # torch.save(mrnet, exp_dir + f'/models/{file_name}')
+                torch.save(mrnet, exp_dir + f'/models/{file_name}')
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -392,6 +394,18 @@ def run(args):
         fw.writerow(['LOSS', 'AUC-best', 'Accuracy-best', 'Sensitivity-best', 'Specifity-best'])
         fw.writerow([best_val_loss, best_val_auc, best_val_accuracy, best_val_sensitivity, best_val_specificity])
         res_file.close()
+
+
+    fpr = []
+    tpr = []
+    fpr, tpr, thresholds = roc_curve(all_labels, all_preds)
+    print(fpr, tpr)
+    filename = "roc_curve_" + args.prefix_name + "_" + args.task + "_" + args.plane
+    with open(os.path.join(exp_dir, 'results', filename), 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['FPR', 'TPR', 'Threshold'])
+        for i in range(len(fpr)):
+            writer.writerow([fpr[i], tpr[i], thresholds[i]])
 
     t_end_training = time.time()
     print(f'training took {t_end_training - t_start_training} s')
