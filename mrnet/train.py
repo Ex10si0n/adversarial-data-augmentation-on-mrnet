@@ -5,6 +5,7 @@ from datetime import datetime
 import random
 import argparse
 import numpy as np
+import torchviz
 from tqdm import tqdm
 
 import torch
@@ -20,6 +21,8 @@ from models.mrnet import MRNet
 from sklearn import metrics
 import csv
 import utils as ut
+
+torch.autograd.set_detect_anomaly(True)
 
 
 def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every=100):
@@ -45,7 +48,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weight)
 
         optimizer.zero_grad()
-        loss.backward()
+        loss.backward(retain_graph=True)
         optimizer.step()
 
         loss_value = loss.item()
@@ -170,7 +173,7 @@ def fgsm_attack(model, loss, image, label, weight, eps, device):
 
     # model.zero_grad()
     adversarial_loss = loss(outputs, label, weight=weight).to(device)
-    adversarial_loss.backward()
+    adversarial_loss.backward(retain_graph=True)
 
     attack_image = image + eps * image.grad.sign()
     attack_image = torch.clamp(attack_image, 0, 1).detach()
@@ -211,7 +214,7 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
         adv_loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weight)
 
         optimizer.zero_grad()
-        adv_loss.backward()
+        adv_loss.backward(retain_graph=True)
         optimizer.step()
 
         loss_value = adv_loss.item()
@@ -221,6 +224,8 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
 
         y_trues.append(int(label[0]))
         y_preds.append(probas[0].item())
+
+        # torchviz.make_dot(prediction.mean(), params=dict(model.named_parameters())).render("prediction", format="png")
 
         try:
             auc = metrics.roc_auc_score(y_trues, y_preds)
