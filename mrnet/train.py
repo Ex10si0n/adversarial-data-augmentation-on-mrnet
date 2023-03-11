@@ -22,7 +22,7 @@ from sklearn import metrics
 import csv
 import utils as ut
 
-torch.autograd.set_detect_anomaly(True)
+# torch.autograd.set_detect_anomaly(True)
 
 
 def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every=100):
@@ -229,6 +229,9 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
 
         try:
             auc = metrics.roc_auc_score(y_trues, y_preds)
+            accuracy = metrics.accuracy_score(y_trues, (np.array(y_preds) > 0.5).astype(int))
+            sensitivity = metrics.recall_score(y_trues, (np.array(y_preds) > 0.5).astype(int))
+            specificity = metrics.recall_score(1 - np.array(y_trues), 1 - (np.array(y_preds) > 0.5).astype(int))
         except:
             auc = 0.5
 
@@ -254,6 +257,9 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
 
     train_loss_epoch = np.round(np.mean(losses), 4)
     train_auc_epoch = np.round(auc, 4)
+    train_accuracy_epoch = np.round(accuracy, 4)
+    train_sensitivity_epoch = np.round(sensitivity, 4)
+    train_specificity_epoch = np.round(specificity, 4)
 
     return train_loss_epoch, train_auc_epoch
 
@@ -365,12 +371,28 @@ def run(args):
         t_end = time.time()
         delta = t_end - t_start
 
-        learning_curve_csv = f'/results/learning_curve_{args.prefix_name}_{args.task}_{args.plane}.csv'
+        learning_curve_csv = f'learning_curve_{args.prefix_name}_{args.task}_{args.plane}.csv'
+
         # save epoch, train_loss, train_auc, val_loss, val_auc
-        with open(os.path.join(exp_dir, 'results', learning_curve_csv), 'a') as res_file:
+        # with open(os.path.join(exp_dir, 'results', learning_curve_csv), 'a+') as res_file:
+        #     fa = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        #     fa.writerow([epoch, train_loss, train_auc, val_loss, val_auc])
+        #     res_file.close()
+
+        filename = os.path.join(exp_dir, 'results', learning_curve_csv)
+        # Check if file exists
+        if os.path.exists(filename):
+            mode = 'a'
+        else:
+            mode = 'w'
+
+        # Open file and append or write to it
+        with open(filename, mode) as res_file:
             fa = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            if mode == 'w':
+                # write headers if the file is newly created
+                fa.writerow(['epoch', 'train_loss', 'train_auc', 'val_loss', 'val_auc'])
             fa.writerow([epoch, train_loss, train_auc, val_loss, val_auc])
-            res_file.close()
 
 
         print("train loss : {0} | train auc {1} | val loss {2} | val auc {3} | elapsed time {4} s".format(
