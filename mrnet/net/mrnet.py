@@ -22,7 +22,7 @@ class MRNet(nn.Module):
         x = self.classifier(x)
         return x
 
-if __name__ == '__main__':
-    model = MRNet()
-    x = torch.randn(1, 1, 224, 224)
-    torchviz.make_dot(model(x).mean(), params=dict(model.named_parameters())).render("mrnet", format="png")
+# if __name__ == '__main__':
+#     model = MRNet()
+#     x = torch.randn(1, 1, 224, 224)
+#     torchviz.make_dot(model(x).mean(), params=dict(model.named_parameters())).render("mrnet", format="png")

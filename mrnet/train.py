@@ -48,7 +48,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weight)
 
         optimizer.zero_grad()
-        loss.backward(retain_graph=True)
+        loss.backward()
         optimizer.step()
 
         loss_value = loss.item()
@@ -173,7 +173,7 @@ def fgsm_attack(model, loss, image, label, weight, eps, device):
 
     # model.zero_grad()
     adversarial_loss = loss(outputs, label, weight=weight).to(device)
-    adversarial_loss.backward(retain_graph=True)
+    adversarial_loss.backward()
 
     attack_image = image + eps * image.grad.sign()
     attack_image = torch.clamp(attack_image, 0, 1).detach()
@@ -214,7 +214,7 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
         adv_loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weight)
 
         optimizer.zero_grad()
-        adv_loss.backward(retain_graph=True)
+        adv_loss.backward()
         optimizer.step()
 
         loss_value = adv_loss.item()
