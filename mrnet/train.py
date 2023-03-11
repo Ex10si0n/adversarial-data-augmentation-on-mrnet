@@ -365,6 +365,14 @@ def run(args):
         t_end = time.time()
         delta = t_end - t_start
 
+        learning_curve_csv = f'/results/learning_curve_{args.prefix_name}_{args.task}_{args.plane}.csv'
+        # save epoch, train_loss, train_auc, val_loss, val_auc
+        with open(os.path.join(exp_dir, 'results', learning_curve_csv), 'a') as res_file:
+            fa = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            fa.writerow([epoch, train_loss, train_auc, val_loss, val_auc])
+            res_file.close()
+
+
         print("train loss : {0} | train auc {1} | val loss {2} | val auc {3} | elapsed time {4} s".format(
             train_loss, train_auc, val_loss, val_auc, delta))
 
@@ -401,6 +409,7 @@ def run(args):
         res_file.close()
 
 
+    # draw ROC curve for best model on validation set
     fpr = []
     tpr = []
     fpr, tpr, thresholds = roc_curve(all_labels, all_preds)
