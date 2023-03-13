@@ -61,8 +61,14 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
         try:
             auc = metrics.roc_auc_score(y_trues, y_preds)
+            accuracy = metrics.accuracy_score(y_trues, (np.array(y_preds) > 0.5).astype(int))
+            sensitivity = metrics.recall_score(y_trues, (np.array(y_preds) > 0.5).astype(int))
+            specificity = metrics.recall_score(1 - np.array(y_trues), 1 - (np.array(y_preds) > 0.5).astype(int))
         except:
             auc = 0.5
+            accuracy = 0.5
+            sensitivity = 0.5
+            specificity = 0.5
 
         writer.add_scalar('Train/Loss', loss_value,
                           epoch * len(train_loader) + i)
@@ -86,8 +92,12 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
     train_loss_epoch = np.round(np.mean(losses), 4)
     train_auc_epoch = np.round(auc, 4)
+    train_accuracy_epoch = np.round(accuracy, 4)
+    train_sensitivity_epoch = np.round(sensitivity, 4)
+    train_specificity_epoch = np.round(specificity, 4)
 
-    return train_loss_epoch, train_auc_epoch
+
+    return train_loss_epoch, train_auc_epoch, train_accuracy_epoch, train_sensitivity_epoch, train_specificity_epoch
 
 
 def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, device, log_every=20, return_predictions=False):
@@ -234,6 +244,9 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
             specificity = metrics.recall_score(1 - np.array(y_trues), 1 - (np.array(y_preds) > 0.5).astype(int))
         except:
             auc = 0.5
+            accuracy = 0.5
+            sensitivity = 0.5
+            specificity = 0.5
 
         writer.add_scalar('Train/Loss', loss_value, epoch * train_times + i)
         writer.add_scalar('Train/AUC', auc, epoch * train_times + i)
@@ -261,7 +274,7 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
     train_sensitivity_epoch = np.round(sensitivity, 4)
     train_specificity_epoch = np.round(specificity, 4)
 
-    return train_loss_epoch, train_auc_epoch
+    return train_loss_epoch, train_auc_epoch, train_accuracy_epoch, train_sensitivity_epoch, train_specificity_epoch
 
 
 def run(args):
@@ -352,11 +365,11 @@ def run(args):
 
         # train
         if args.advtrain == 1:
-            train_loss, train_auc = train_model_adv(model, args.epsilon, train_loader, epoch, num_epochs, optimizer,
+            train_loss, train_auc, train_accuracy, train_sensitivity, train_specificity = train_model_adv(model, args.epsilon, train_loader, epoch, num_epochs, optimizer,
                                                     writer, current_lr, device, log_every, args.advtrain_percent)
             val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity, val_preds, val_labels = evaluate_model(model, validation_loader, epoch, num_epochs, writer, current_lr, device, return_predictions=True)
         else:
-            train_loss, train_auc = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr,
+            train_loss, train_auc, train_accuracy, train_sensitivity, train_specificity = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr,
                                                 device, log_every)
             val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity, val_preds, val_labels = evaluate_model(mrnet, validation_loader, epoch, num_epochs, writer, current_lr, device, return_predictions=True)
 
@@ -373,12 +386,6 @@ def run(args):
 
         learning_curve_csv = f'learning_curve_{args.prefix_name}_{args.task}_{args.plane}.csv'
 
-        # save epoch, train_loss, train_auc, val_loss, val_auc
-        # with open(os.path.join(exp_dir, 'results', learning_curve_csv), 'a+') as res_file:
-        #     fa = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        #     fa.writerow([epoch, train_loss, train_auc, val_loss, val_auc])
-        #     res_file.close()
-
         filename = os.path.join(exp_dir, 'results', learning_curve_csv)
         # Check if file exists
         if os.path.exists(filename):
@@ -391,8 +398,8 @@ def run(args):
             fa = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             if mode == 'w':
                 # write headers if the file is newly created
-                fa.writerow(['epoch', 'train_loss', 'train_auc', 'val_loss', 'val_auc'])
-            fa.writerow([epoch, train_loss, train_auc, val_loss, val_auc])
+                fa.writerow(['epoch', 'train_loss', 'train_auc', 'train_accuracy', 'train_sensitivity', 'train_specificity', 'val_loss', 'val_auc', 'val_accuracy', 'val_sensitivity', 'val_specificity'])
+            fa.writerow([epoch, train_loss, train_auc, train_accuracy, train_sensitivity, train_specificity, val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity])
 
 
         print("train loss : {0} | train auc {1} | val loss {2} | val auc {3} | elapsed time {4} s".format(
