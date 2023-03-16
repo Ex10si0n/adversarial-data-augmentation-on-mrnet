@@ -4,9 +4,9 @@ DATA_PATH='/Users/ex10si0n/MRNet-v1.0/'
 EPOCHS=20
 PREFIX=MRNet
 
-for PERCENT in 0.06
+for PERCENT in 0.04
 do
-  for EPS in 0.0001
+  for EPS in 0.00001
   do
     DATE=$(date +"%Y-%m-%d-%H-%M")
     EXPERIMENT="MRNet-${DATE}-MRNet-${EPS}-${PERCENT}"

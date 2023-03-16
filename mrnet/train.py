@@ -24,7 +24,6 @@ import utils as ut
 
 # torch.autograd.set_detect_anomaly(True)
 
-
 def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every=100):
     """
     Procedure to train a model on the training set
@@ -328,6 +327,8 @@ def run(args):
         print("[INFO] Loading weights:", weights_name)
 
         model = torch.load(weights_name)
+        model = model.to(device)
+        # load weights
         model.eval()
 
     if args.advtrain == 1:
