@@ -26,6 +26,7 @@ def plot_combiner(p1=None, p2=None, p3=None, pattern="", labels=[]):
         plt.xticks(np.arange(0, 70, 5))
         plt.xlabel('epoch')
         plt.ylabel(label)
+        plt.title(pattern.split("/")[1] + " " + label)
 
         plt.plot(p1[:, 0], p1[:, i+1], label=labels[0])
         if p2 is not None:
@@ -75,10 +76,10 @@ def plot_curve(a1, a2, b, t, d, pattern):
         info = "baseline_adv_1/" + t + "_" + d
         plot_combiner(p1=b, p2=a1, pattern=info, labels=["baseline", "eps=1e-4, %=0.06"])
     # if bin(pattern) == "0b110":
-    #     pass
+    #    info = "baseline_adv_ori/" + t + "_" + d
     if bin(pattern) == "0b111":
         info = "baseline_adv_1_adv_2/" + t + "_" + d
-        plot_combiner(p1=b, p2=a1, p3=a2, pattern=info, labels=["baseline", "eps=1e-4, %=0.06", "eps=1e-5, %=0.04"])
+        plot_combiner(p1=b, p2=a1, p3=a2, pattern=info, labels=["baseline", "eps=1e-4, %=0.06", "eps=1e-5, %=0.04", "eps=0, %=0.04"])
 
 
 for t in task:

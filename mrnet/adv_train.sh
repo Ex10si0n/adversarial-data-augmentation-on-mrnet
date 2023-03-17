@@ -6,7 +6,7 @@ PREFIX=MRNet
 
 for PERCENT in 0.04
 do
-  for EPS in 0.00001
+  for EPS in 0
   do
     DATE=$(date +"%Y-%m-%d-%H-%M")
     EXPERIMENT="MRNet-${DATE}-MRNet-${EPS}-${PERCENT}"
