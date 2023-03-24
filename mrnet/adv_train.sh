@@ -4,9 +4,9 @@ DATA_PATH='/Users/ex10si0n/MRNet-v1.0/'
 EPOCHS=20
 PREFIX=MRNet
 
-for PERCENT in 0.04
+for PERCENT in 0.01 0.02 0.03 0.04 0.05 0.06 0.1
 do
-  for EPS in 0
+  for EPS in 0.00005 0.0001 0.0005 0.001 0.003
   do
     DATE=$(date +"%Y-%m-%d-%H-%M")
     EXPERIMENT="MRNet-${DATE}-MRNet-${EPS}-${PERCENT}"
@@ -15,11 +15,11 @@ do
     python3 train.py -t acl -p coronal --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
     python3 train.py -t acl -p axial --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
 
-    python3 train.py -t meniscus -p sagittal --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
+    python3 train.py -t meniscus -p sagittal --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=40 --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
     python3 train.py -t meniscus -p coronal --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
     python3 train.py -t meniscus -p axial --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
 
-    python3 train.py -t abnormal -p sagittal --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
+    python3 train.py -t abnormal -p sagittal --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=40 --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
     python3 train.py -t abnormal -p coronal --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
     python3 train.py -t abnormal -p axial --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
 

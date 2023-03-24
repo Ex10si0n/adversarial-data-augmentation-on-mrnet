@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 exp_dir = os.path.join(os.path.dirname(__file__), "../../mrnet/experiments")
-exp_eps = ["0.0001", "0.00001"]
-exp_percent = ["0.06", "0.04"]
+exp_eps = ["0.00001", "0"]
+exp_percent = ["0.06", "0"]
 title = "epoch,train_loss,train_auc,train_accuracy,train_sensitivity,train_specificity,val_loss,val_auc,val_accuracy,val_sensitivity,val_specificity"
 task = ["acl", "meniscus", "abnormal"]
 dim = ["coronal", "sagittal", "axial"]
@@ -69,17 +69,17 @@ def plot_curve(a1, a2, b, t, d, pattern):
     # if bin(pattern) == "0b100":
     #     info = "adv_1/" + t + "/" + d
     #     plot_combiner(p1=a1, pattern=info)
-    if bin(pattern) == "0b11":
-        info = "baseline_adv_2/" + t + "_" + d
-        plot_combiner(p1=b, p2=a2, pattern=info, labels=["baseline", "eps=1e-5, %=0.04"])
+    # if bin(pattern) == "0b11":
+    #    info = "baseline_adv_2/" + t + "_" + d
+    #    plot_combiner(p1=b, p2=a2, pattern=info, labels=["baseline", "eps=1e-5, %=0.06"])
     if bin(pattern) == "0b101":
-        info = "baseline_adv_1/" + t + "_" + d
-        plot_combiner(p1=b, p2=a1, pattern=info, labels=["baseline", "eps=1e-4, %=0.06"])
+       info = "baseline_adv_1/" + t + "_" + d
+       plot_combiner(p1=b, p2=a1, pattern=info, labels=["baseline", "eps=1e-5, %=0.06"])
     # if bin(pattern) == "0b110":
     #    info = "baseline_adv_ori/" + t + "_" + d
-    if bin(pattern) == "0b111":
-        info = "baseline_adv_1_adv_2/" + t + "_" + d
-        plot_combiner(p1=b, p2=a1, p3=a2, pattern=info, labels=["baseline", "eps=1e-4, %=0.06", "eps=1e-5, %=0.04", "eps=0, %=0.04"])
+    # if bin(pattern) == "0b111":
+    #    info = "baseline_adv_1_adv_2/" + t + "_" + d
+    #    plot_combiner(p1=b, p2=a1, p3=a2, pattern=info, labels=["baseline", "eps=1e-4, %=0.06", "eps=1e-5, %=0.04", "eps=0, %=0.04"])
 
 
 for t in task:

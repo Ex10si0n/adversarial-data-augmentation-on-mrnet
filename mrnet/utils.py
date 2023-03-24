@@ -45,12 +45,19 @@ def random_flip(array):
 def accuracy_sensitivity_specificity(y_trues, y_preds):
     cm = confusion_matrix(y_trues, y_preds)
     tn, fp, fn, tp = cm.ravel()
+    print('tn: {}, fp: {}, fn: {}, tp: {}'.format(tn, fp, fn, tp))
     total = sum(sum(cm))
     #accuracy = (cm[0,0] + cm[1,1]) / total
     #sensitivity = cm[1,1] / (cm[1,1] + cm[1,0])
     #specificity = cm[0,0] / (cm[0,0] + cm[0,1])
     accuracy = (tp + tn) / total
-    sensitivity = tp / (tp + fn)
-    specificity = tn / (tn + fp)
+    if tp + fn == 0:
+        sensitivity = 0
+    else:
+        sensitivity = tp / (tp + fn)
+    if tn + fp == 0:
+        specificity = 0
+    else:
+        specificity = tn / (tn + fp)
 
     return accuracy, sensitivity, specificity

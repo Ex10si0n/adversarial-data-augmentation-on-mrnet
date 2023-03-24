@@ -1,6 +1,6 @@
 import os
 
-curve_dir = './curve/baseline_adv_1_adv_2'
+curve_dir = './curve/baseline_adv_2'
 plot_task = curve_dir.split('/')[-1] + '/'
 
 graphs = ['train-accuracy', 'train-loss', 'train-specificity', 'val-auc', 'val-sensitivity', 'train-auc', 'train-sensitivity', 'val-accuracy', 'val-loss', 'val-specificity', 'auc', 'sensitivity', 'accuracy', 'loss', 'specificity']

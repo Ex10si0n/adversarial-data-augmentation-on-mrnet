@@ -21,6 +21,7 @@ def gen_csv(path, filename):
             os.chdir(os.path.join(path, f, 'results'))
             files = os.listdir()
             for file in files:
+                if not file.startswith("model"): continue
                 task, dimension = file.split('.')[0].split('-')[0].split('_')[-2:]
                 # print('find result: task = {}, dimension = {}'.format(task, dimension))
 

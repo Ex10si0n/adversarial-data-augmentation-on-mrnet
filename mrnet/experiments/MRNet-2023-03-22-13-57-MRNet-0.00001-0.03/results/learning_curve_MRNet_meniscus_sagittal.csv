@@ -1,0 +1,5 @@
+epoch,train_loss,train_auc,train_accuracy,train_sensitivity,train_specificity,val_loss,val_auc,val_accuracy,val_sensitivity,val_specificity,val_adv_loss,val_adv_auc,val_adv_accuracy,val_adv_sensitivity,val_adv_specificity
+0,0.2768,0.525,0.7576,0.0,1.0,0.2855,0.7647,0.6667,0.6731,0.6618,0.3753,0.675,0.4412,0.05,1.0
+1,0.2767,0.6944,0.7576,0.1111,1.0,0.2854,0.7653,0.6667,0.6538,0.6765,0.3896,0.6857,0.4118,0.0,1.0
+2,0.2648,0.5934,0.7273,0.0,0.9231,0.2858,0.7647,0.65,0.6154,0.6765,0.3188,0.8,0.6176,0.0714,1.0
+3,0.2461,0.81,0.7879,0.125,1.0,0.2856,0.7647,0.65,0.6154,0.6765,0.3429,0.7053,0.5882,0.0667,1.0

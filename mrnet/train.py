@@ -108,7 +108,53 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
     y_trues = []
     y_preds = []
     y_class_preds = []
+    adv_y_trues = []
+    adv_y_preds = []
+    adv_y_class_preds = []
     losses = []
+    adv_losses = []
+    percent = args.advtrain_percent
+
+    # running adv validation
+    for i, (image, label, weight) in enumerate(val_loader):
+        stop_on = int(1130 * percent)
+        if i > stop_on:
+            break
+        image = image.to(device)
+        label = label.to(device)
+        weight = weight.to(device)
+        epsilon = args.epsilon
+        adv_image = fgsm_attack(model, F.binary_cross_entropy_with_logits, image, label, weight, epsilon, device="mps")
+        adv_prediction = model.forward(adv_image.float())
+        adv_loss = F.binary_cross_entropy_with_logits(adv_prediction, label, weight=weight)
+        adv_loss_value = adv_loss.item()
+        adv_losses.append(adv_loss_value)
+        adv_probas = torch.sigmoid(adv_prediction)
+        adv_y_trues.append(int(label[0]))
+        adv_y_preds.append(adv_probas[0].item())
+        adv_y_class_preds.append((adv_probas[0] > 0.5).float().item())
+
+        try:
+            adv_auc = metrics.roc_auc_score(adv_y_trues, adv_y_preds)
+        except:
+            adv_auc = 0.5
+
+    writer.add_scalar('Adv Val/Loss', adv_loss_value, epoch * len(val_loader) + i)
+    writer.add_scalar('Adv Val/AUC', adv_auc, epoch * len(val_loader) + i)
+    writer.add_scalar('Adv Val/AUC_epoch', adv_auc, epoch)
+    print('Adv Val/AUC_epoch', adv_auc, epoch)
+    val_adv_loss_epoch = np.round(np.mean(adv_losses), 4)
+    val_adv_auc_epoch = np.round(adv_auc, 4)
+    try:
+        print("adv_y_trues: ", adv_y_trues, "adv_y_class_preds: ", adv_y_class_preds)
+        val_adv_accuracy, val_adv_sensitivity, val_adv_specificity = ut.accuracy_sensitivity_specificity(adv_y_trues, adv_y_class_preds)
+        val_adv_accuracy = np.round(val_adv_accuracy, 4)
+        val_adv_sensitivity = np.round(val_adv_sensitivity, 4)
+        val_adv_specificity = np.round(val_adv_specificity, 4)
+    except:
+        val_adv_accuracy = 0.5
+        val_adv_sensitivity = 0.5
+        val_adv_specificity = 0.5
 
     for i, (image, label, weight) in enumerate(val_loader):
 
@@ -162,16 +208,22 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
     val_sensitivity = np.round(val_sensitivity, 4)
     val_specificity = np.round(val_specificity, 4)
     if return_predictions:
+        return val_loss_epoch, val_auc_epoch, val_accuracy, val_sensitivity, val_specificity, y_preds, y_trues, val_adv_loss_epoch, val_adv_auc_epoch, val_adv_accuracy, val_adv_sensitivity, val_adv_specificity, adv_y_preds, adv_y_trues
+    else:
+        return val_loss_epoch, val_auc_epoch, val_accuracy, val_sensitivity, val_specificity
+    '''
+    if return_predictions:
         return val_loss_epoch, val_auc_epoch, val_accuracy, val_sensitivity, val_specificity, y_preds, y_trues
     else:
         return val_loss_epoch, val_auc_epoch, val_accuracy, val_sensitivity, val_specificity
+    '''
 
 
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:
         return param_group['lr']
 
-
+# CHECK BUG
 def fgsm_attack(model, loss, image, label, weight, eps, device):
     image = image.to(device)
     label = label.to(device)
@@ -215,7 +267,10 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
         weight = weight.to(device)
 
         # adversarial perturbation
-        adv_image = fgsm_attack(model, F.binary_cross_entropy_with_logits, image, label, weight, epsilon, device)
+        if epsilon > 0:
+            adv_image = fgsm_attack(model, F.binary_cross_entropy_with_logits, image, label, weight, epsilon, device)
+        else:
+            adv_image = image
 
         # adversarial training with perturbed image
         prediction = model(adv_image.float())
@@ -233,6 +288,7 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
 
         y_trues.append(int(label[0]))
         y_preds.append(probas[0].item())
+
 
         # torchviz.make_dot(prediction.mean(), params=dict(model.named_parameters())).render("prediction", format="png")
 
@@ -264,6 +320,10 @@ def train_model_adv(model, epsilon, train_loader, epoch, num_epochs, optimizer, 
                     epsilon
                 )
             )
+
+    print("================== adv train ==================")
+    print("train times: ", train_times)
+    print("y_trues: ", y_trues, "y_preds: ", y_preds)
 
     writer.add_scalar('Train/AUC_epoch', auc, epoch)
 
@@ -368,14 +428,19 @@ def run(args):
         if args.advtrain == 1:
             train_loss, train_auc, train_accuracy, train_sensitivity, train_specificity = train_model_adv(model, args.epsilon, train_loader, epoch, num_epochs, optimizer,
                                                     writer, current_lr, device, log_every, args.advtrain_percent)
-            val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity, val_preds, val_labels = evaluate_model(model, validation_loader, epoch, num_epochs, writer, current_lr, device, return_predictions=True)
+            val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity, val_preds, val_labels, val_adv_loss_epoch, val_adv_auc_epoch, val_adv_accuracy, val_adv_sensitivity, val_adv_specificity, adv_y_preds, adv_y_trues = evaluate_model(model, validation_loader, epoch, num_epochs, writer, current_lr, device, return_predictions=True)
         else:
             train_loss, train_auc, train_accuracy, train_sensitivity, train_specificity = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr,
                                                 device, log_every)
             val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity, val_preds, val_labels = evaluate_model(mrnet, validation_loader, epoch, num_epochs, writer, current_lr, device, return_predictions=True)
+            # calculate samples [find error]
+
 
         all_preds.extend(val_preds)
         all_labels.extend(val_labels)
+
+        # all_adv_preds.extend(adv_y_preds)
+        # all_adv_labels.extend(adv_y_trues)
 
         if args.lr_scheduler == 'plateau':
             scheduler.step(val_loss)
@@ -399,8 +464,8 @@ def run(args):
             fa = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             if mode == 'w':
                 # write headers if the file is newly created
-                fa.writerow(['epoch', 'train_loss', 'train_auc', 'train_accuracy', 'train_sensitivity', 'train_specificity', 'val_loss', 'val_auc', 'val_accuracy', 'val_sensitivity', 'val_specificity'])
-            fa.writerow([epoch, train_loss, train_auc, train_accuracy, train_sensitivity, train_specificity, val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity])
+                fa.writerow(['epoch', 'train_loss', 'train_auc', 'train_accuracy', 'train_sensitivity', 'train_specificity', 'val_loss', 'val_auc', 'val_accuracy', 'val_sensitivity', 'val_specificity', 'val_adv_loss', 'val_adv_auc', 'val_adv_accuracy', 'val_adv_sensitivity', 'val_adv_specificity'])
+            fa.writerow([epoch, train_loss, train_auc, train_accuracy, train_sensitivity, train_specificity, val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity, val_adv_loss_epoch, val_adv_auc_epoch, val_adv_accuracy, val_adv_sensitivity, val_adv_specificity])
 
 
         print("train loss : {0} | train auc {1} | val loss {2} | val auc {3} | elapsed time {4} s".format(
@@ -442,6 +507,8 @@ def run(args):
     # draw ROC curve for best model on validation set
     fpr = []
     tpr = []
+    # all_labels are validation ground truth labels
+    # all_preds are validation predictions from the model
     fpr, tpr, thresholds = roc_curve(all_labels, all_preds)
     print(fpr, tpr)
     filename = "roc_curve_" + args.prefix_name + "_" + args.task + "_" + args.plane

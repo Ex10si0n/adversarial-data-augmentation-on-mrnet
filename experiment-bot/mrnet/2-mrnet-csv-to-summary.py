@@ -72,10 +72,13 @@ if __name__ == '__main__':
             result_lines.append(row)
 
     print('Read {} lines'.format(len(result_lines)))
-    
     marts = []
     for line in result_lines:
-        marts.append(Mart(line[0], line[1], line[2], line[3], line[4:]))
+        print("Processing line: {}".format(line))
+        try:
+            marts.append(Mart(line[0], line[1], line[2], line[3], line[4:]))
+        except:
+            pass
 
     summary = MartSummary()
     for mart in marts:
@@ -83,7 +86,6 @@ if __name__ == '__main__':
 
     # print("All dimensions: ", summary.all_dimensions())
     # print("All tasks: ", summary.all_tasks())
-    
     tables = []
     workbook = xlsxwriter.Workbook(settings.working_folder + settings.xlsx_file)
     all_params = summary.all_params()
@@ -106,7 +108,11 @@ if __name__ == '__main__':
                 for task in summary.all_tasks():
                     for dimension in summary.all_dimensions():
                         for mart in summary.query(task, dimension, params[0], params[1]):
-                            avg += float(mart.get_facts_by_name(measure))
+                            try:
+                                avg += float(mart.get_facts_by_name(measure))
+                            except:
+                                print("Error: ", task, dimension, mart, measure)
+                                continue
                 avg /= 9
                 worksheet.write(x, y, avg)
 
