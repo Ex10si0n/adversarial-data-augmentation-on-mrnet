@@ -4,9 +4,9 @@ DATA_PATH='/Users/ex10si0n/MRNet-v1.0/'
 EPOCHS=20
 PREFIX=MRNet
 
-for PERCENT in 0.01 0.02 0.03 0.04 0.05 0.06 0.1
+for PERCENT in 0.06
 do
-  for EPS in 0.00005 0.0001 0.0005 0.001 0.003
+  for EPS in 0.001 0.003 0.005 0.007 0.01
   do
     DATE=$(date +"%Y-%m-%d-%H-%M")
     EXPERIMENT="MRNet-${DATE}-MRNet-${EPS}-${PERCENT}"
@@ -23,7 +23,5 @@ do
     python3 train.py -t abnormal -p coronal --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
     python3 train.py -t abnormal -p axial --experiment $EXPERIMENT --data-path $DATA_PATH --prefix_name $PREFIX --epochs=$EPOCHS --advtrain 1 --advtrain_percent $PERCENT --epsilon $EPS
 
-
-    python3 train_logistic_regression.py --path-to-model "experiments/${EXPERIMENT}/models/" --data-path $DATA_PATH
   done
 done

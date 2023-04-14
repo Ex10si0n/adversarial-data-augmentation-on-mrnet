@@ -484,7 +484,10 @@ def run(args):
                 for f in os.listdir(exp_dir + '/models/'):
                     if (args.task in f) and (args.plane in f) and (args.prefix_name in f):
                         os.remove(exp_dir + f'/models/{f}')
-                torch.save(mrnet, exp_dir + f'/models/{file_name}')
+                if args.advtrain == 1:
+                    torch.save(model, exp_dir + f'/models/{file_name}')
+                else:
+                    torch.save(mrnet, exp_dir + f'/models/{file_name}')
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
