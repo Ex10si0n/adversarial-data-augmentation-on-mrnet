@@ -14,6 +14,14 @@ To conduct adversarial training, please refers shell script: `adv_train.sh` with
 
 The code was modified based on the GitHub Repository [Matteo-dunnhofer/mrnet-baseline](https://github.com/matteo-dunnhofer/mrnet-baseline). Lines addition of the codes (only changed the original code here) in `mrnet/train.py` could be found in this report: [/compare/diff.pdf](./compare/diff.pdf). Besides, folder: `experiment-bot` and `compare` was designed and implemented with originality.
 
+## Poster
+
+[![](./latex/poster.png)](https://github.com/Ex10si0n/research/blob/main/poster.pdf)
+
+## Demo Video
+
+[![Demo Video on Adversarial Training (My Final Year Research Project)](https://img.youtube.com/vi/nUUvZIiOlAs/0.jpg)](https://www.youtube.com/watch?v=nUUvZIiOlAs)
+
 ## Liences
 
 MIT
