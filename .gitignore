@@ -1,7 +1,11 @@
 images/
+videos/
 saved_model/
 .idea/
 data/
 models/
 .DS_Store
 __pycache__/
+*.mp3
+*.flac
+*.wav
