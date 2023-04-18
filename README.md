@@ -1,4 +1,4 @@
-# Baseline Model
+## Baseline Model
 
 This repository contains the baseline model which reproduces the results proposed in the paper ["Deep-learning-assisted diagnosis for knee magnetic resonance imaging: Development and retrospective validation of MRNet"](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1002699) by Bien, Rajpurkar et al.
 
